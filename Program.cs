@@ -36,7 +36,7 @@ namespace TicTacToe
             {
                 Console.WriteLine("{0} goes first.", player2[0]);
             }
-            Console.WriteLine("press enter to continue...");
+            Console.WriteLine("press enter to continue....");
             Console.ReadLine();
             Console.Clear();
 
