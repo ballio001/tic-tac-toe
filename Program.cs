@@ -4,44 +4,31 @@ namespace TicTacToe
 {
     class Program
     {
-        private static string[] Pos = { "0", "1", "2", "3", "4", "5", "6", "7", "8" };
+        // 0 isn't used
+        private static string[] playField = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 
         private static void DrawTicTacToe()
         {
-            Console.WriteLine("      {0} |   {1} |   {2}    ", Pos[0], Pos[1], Pos[2]);
-            Console.WriteLine("     ---------------");
-            Console.WriteLine("      {0} |   {1} |   {2}    ", Pos[3], Pos[4], Pos[5]);
-            Console.WriteLine("     ---------------");
-            Console.WriteLine("      {0} |   {1} |   {2}    ", Pos[6], Pos[7], Pos[8]);
+            string format = "      {0} |   {1} |   {2}    ";
+            string separator = "     ---------------";
+            Console.WriteLine(format, playField[1], playField[2], playField[3]);
+            Console.WriteLine(separator);
+            Console.WriteLine(format, playField[4], playField[5], playField[6]);
+            Console.WriteLine(separator);
+            Console.WriteLine(format, playField[7], playField[8], playField[9]);
         }
 
         private static string[] EnterPlayers()
         {
-            string[] players = EnterPlayers();
-            string player1 = players[0];
-            string player2 = players[1];
             Console.WriteLine("Welcome to Tic Tac Toe!");
             Console.WriteLine("This is a 2 player game.");
             Console.WriteLine("Please Enter your name to be displayed as Player 1: ");
-            //var player1 = Console.ReadLine();
-            Console.WriteLine("What is the name of player 2?");
-            //var player2 = Console.ReadLine();
-            Console.WriteLine("{0} will be using O's, and {1} is X.", player1[0], player2[1]);
+            var player1 = Console.ReadLine();
+            Console.WriteLine("What would the name of player 2 be?");
+            var player2 = Console.ReadLine();
+            Console.WriteLine("{0} will be using O's, and {1} is X.", player1, player2);
             Console.WriteLine("");
 
-            //random who begins first
-            Random rnd = new Random();
-            int first = rnd.Next(1, 2);
-            if (first == 1)
-            {
-                Console.WriteLine("{0} goes first.", player1[0]);
-            }
-            else
-            {
-                Console.WriteLine("{0} goes first.", player2[0]);
-            }
-
-            Console.WriteLine("press enter to continue...");
             Console.ReadLine();
             Console.Clear();
 
@@ -51,24 +38,23 @@ namespace TicTacToe
         //check lines & wins
         private static bool IsLine(int index0, int index1, int index2, string Symbol)
         {
-            return Pos[index0] == Symbol && Pos[index1] == Symbol && Pos[index2] == Symbol;
+            return playField[index0] == Symbol && playField[index1] == Symbol && playField[index2] == Symbol;
         }
 
-        static bool Checkwin()
+        static bool CheckWin()
         {
             //O
-            if (IsLine(0, 1, 2, "O") || IsLine(3, 4, 5, "O") || IsLine(6, 7, 8, "O")//vertical
-                || IsLine(0, 4, 8, "O") || IsLine(6, 4, 2, "O")//diagonal
-                || IsLine(0, 3, 6, "O") || IsLine(1, 4, 7, "O") || IsLine(6, 4, 2, "O")//horizontal
+            if (IsLine(1, 2, 3, "O") || IsLine(4, 5, 6, "O") || IsLine(7, 8, 9, "O")//vertical
+                || IsLine(1, 5, 9, "O") || IsLine(7, 5, 3, "O")//diagonal
+                || IsLine(1, 4, 7, "O") || IsLine(2, 5, 8, "O") || IsLine(7, 5, 3, "O")//horizontal
                 )
             {
                 return true;
             }
-
             //X
-            if (IsLine(0, 1, 2, "X") || IsLine(3, 4, 5, "X") || IsLine(6, 7, 8, "X")//vertical
-                || IsLine(0, 4, 8, "X") || IsLine(6, 4, 2, "X")//diagonal
-                || IsLine(0, 3, 6, "X") || IsLine(1, 4, 7, "X") || IsLine(6, 4, 2, "X")//horizontal
+            if (IsLine(1, 2, 3, "X") || IsLine(4, 5, 6, "X") || IsLine(7, 8, 9, "X")//vertical
+                || IsLine(1, 5, 9, "X") || IsLine(7, 5, 3, "X")//diagonal
+                || IsLine(1, 4, 7, "X") || IsLine(2, 5, 8, "X") || IsLine(7, 5, 3, "X")//horizontal
                 )
             {
                 return true;
@@ -76,10 +62,122 @@ namespace TicTacToe
             return false;
         }
 
+        //score calculation
+
+
+        public static void ShowScore(string player1, string player2, int score1, int score2)
+        {
+            DrawTicTacToe();
+            Console.WriteLine("Score: {0} - {3}     {2} - {4}", player1, player2, score1, score2);
+        }
+
+
+        //Ask player for input from the minimum given and maximum given
+        private static int PlayerInput(string playerInput, int min, int max)
+        {
+            bool correctInput = false;
+            int input = 0;
+
+            while (correctInput == false)
+            {
+                Console.WriteLine(playerInput);
+                input = int.Parse(Console.ReadLine());
+                if (input > min && input < max)
+                {
+                    correctInput = true;
+                }
+            }
+            return input;
+        }
+
+        //player take turns
+        private static bool TakeTurns(string player1, string player2, int turn)
+        {
+            if (turn == 1)
+            {
+                Console.WriteLine("{0}'s ({1}) turn", player1, "O");
+                var next = PlayerInput("Which position would you like to set.", 1, 9);
+                if (OccupiedSpot(next, "X", "O") == false) return true;
+            }
+            else
+            {
+                Console.WriteLine("{0}'s ({1}) turn", player2, "X");
+                var next = PlayerInput("Which position would you like to set.", 1, 9);
+                if (OccupiedSpot(next, "O", "X") == false) return true;
+            }
+            return false;
+        }
+
+        //check if position is occupied
+        private static bool OccupiedSpot(int move, string opponent, string place)
+        {
+            if (playField[move] == opponent)
+            {
+                Console.WriteLine("You can't steal positions of the other player! ");
+                Console.Write("Try again.");
+                Console.ReadLine();
+                Console.Clear();
+                return true;
+            }
+            playField[move] = place;
+            return false;
+        }
+        //Ask player after the game is played.
+        private static bool Replay()
+        {
+            Console.WriteLine("Would you like to continue the game?");
+            Console.WriteLine("1. Play again.");
+            Console.WriteLine("2. Quit.");
+            //Logic
+            var replay = PlayerInput("", 1, 2);
+            Console.Clear();
+            if(replay == 1)
+            {
+                return true;
+            }
+            Console.WriteLine("The game has ended.");
+            Console.ReadLine();
+            return false;
+        }
+
         static void Main(string[] args)
         {
-            Console.WriteLine("");
-            DrawTicTacToe();
+            string[] players = EnterPlayers();
+
+            PlayingGame(players);
+
+        }
+
+        private static void PlayingGame(string[] players)
+        {
+            string player1 = players[0];
+            string player2 = players[1];
+
+            bool playing = true;
+            int score1 = 0, score2 = 0;
+            bool win = CheckWin();
+
+            while (playing)
+            {
+                DrawTicTacToe();
+                win = false;
+                if (win == false)
+                {
+                    ShowScore(player1, player2, score1, score2);
+                    //turn
+
+                    if (win)
+                    {
+                        //win condition
+
+                    }
+                    else
+                    {
+                        //lose condition
+
+                    }
+                }
+            }
         }
     }
 }
