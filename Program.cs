@@ -41,7 +41,7 @@ namespace TicTacToe
             return playField[index0] == Symbol && playField[index1] == Symbol && playField[index2] == Symbol;
         }
 
-        static bool CheckWin()
+        static bool CheckWin(bool win)
         {
             //O
             if (IsLine(1, 2, 3, "O") || IsLine(4, 5, 6, "O") || IsLine(7, 8, 9, "O")//vertical
@@ -49,6 +49,7 @@ namespace TicTacToe
                 || IsLine(1, 4, 7, "O") || IsLine(2, 5, 8, "O") || IsLine(7, 5, 3, "O")//horizontal
                 )
             {
+                win = true;
                 return true;
             }
             //X
@@ -57,32 +58,31 @@ namespace TicTacToe
                 || IsLine(1, 4, 7, "X") || IsLine(2, 5, 8, "X") || IsLine(7, 5, 3, "X")//horizontal
                 )
             {
+                win = true;
                 return true;
             }
             return false;
         }
 
-        //score calculation
-
-
-        public static void ShowScore(string player1, string player2, int score1, int score2)
+        public static void ShowScore(string player1, int score1, string player2, int score2)
         {
             DrawTicTacToe();
-            Console.WriteLine("Score: {0} - {3}     {2} - {4}", player1, player2, score1, score2);
+            Console.WriteLine("Score: {0} - {1}     {2} - {3}", player1, score1, player2, score2);
+
         }
 
-
+        //FIX: If nothing if filled in then it should ask again
         //Ask player for input from the minimum given and maximum given
         private static int PlayerInput(string playerInput, int min, int max)
         {
             bool correctInput = false;
             int input = 0;
 
-            while (correctInput == false)
+            while (correctInput == false || correctInput == null)
             {
                 Console.WriteLine(playerInput);
                 input = int.Parse(Console.ReadLine());
-                if (input > min && input < max)
+                if (input >= min && input <= max)
                 {
                     correctInput = true;
                 }
@@ -109,7 +109,7 @@ namespace TicTacToe
         }
 
         //check if position is occupied
-        private static bool OccupiedSpot(int move, string opponent, string place)
+        private static bool OccupiedSpot(int move, string opponent, string currentPlayer)
         {
             if (playField[move] == opponent)
             {
@@ -119,7 +119,7 @@ namespace TicTacToe
                 Console.Clear();
                 return true;
             }
-            playField[move] = place;
+            playField[move] = currentPlayer;
             return false;
         }
         //Ask player after the game is played.
@@ -131,7 +131,7 @@ namespace TicTacToe
             //Logic
             var replay = PlayerInput("", 1, 2);
             Console.Clear();
-            if(replay == 1)
+            if (replay == 1)
             {
                 return true;
             }
@@ -143,9 +143,7 @@ namespace TicTacToe
         static void Main(string[] args)
         {
             string[] players = EnterPlayers();
-
             PlayingGame(players);
-
         }
 
         private static void PlayingGame(string[] players)
@@ -155,26 +153,63 @@ namespace TicTacToe
 
             bool playing = true;
             int score1 = 0, score2 = 0;
-            bool win = CheckWin();
+            bool win = false;
+            int turn = 1;
 
+            //ERR: FIX Showing Scoreboard
             while (playing)
             {
-                DrawTicTacToe();
-                win = false;
                 if (win == false)
                 {
-                    ShowScore(player1, player2, score1, score2);
-                    //turn
-
-                    if (win)
+                    //check if somebody has won
+                    //FIX: never goes to true
+                    win = CheckWin(win);
+                    //take turn
+                    while (win == false)
                     {
-                        //win condition
+                        //shows scores and draws field
+                        ShowScore(player1, score1, player2, score2);
+                        TakeTurns(player1, player2, turn);
 
+                        //turns
+                        if (turn == 1)
+                        {
+                            turn = 2;
+                            Console.Clear();
+                        }
+                        else
+                        {
+                            turn = 1;
+                            Console.Clear();
+                        }
                     }
-                    else
-                    {
-                        //lose condition
+                    //reset game
+                    Console.Clear();
+                    DrawTicTacToe();
 
+                    //draw
+                    if (win == false)
+                    {
+                        Console.WriteLine("It's a draw.");
+                        Console.WriteLine("Score: {0} - {1}     {2} - {3}", player1, score1, player2, score2);
+                        playing = Replay();
+                    }
+
+                    //score calculation
+                    if (win == true)
+                    {
+                        if (turn == 1)
+                        {
+                            score1++;
+                            Console.WriteLine("{0} wins! ", player1);
+                            playing = Replay();
+                        }
+                        else if (turn == 2)
+                        {
+                            score2++;
+                            Console.WriteLine("{0} wins! ", player2);
+                            playing = Replay();
+                        }
                     }
                 }
             }
