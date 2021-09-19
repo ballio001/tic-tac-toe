@@ -18,6 +18,15 @@ namespace TicTacToe
             Console.WriteLine(format, playField[7], playField[8], playField[9]);
         }
 
+        //resets list after game is over
+        private static void Refresh()
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                playField[i] = i.ToString();
+            }
+        }
+
         private static string[] EnterPlayers()
         {
             Console.WriteLine("Welcome to Tic Tac Toe!");
@@ -41,7 +50,8 @@ namespace TicTacToe
             return playField[index0] == Symbol && playField[index1] == Symbol && playField[index2] == Symbol;
         }
 
-        static bool CheckWin(bool win)
+        //this is slow needs to be faster
+        static bool CheckWin()
         {
             //O
             if (IsLine(1, 2, 3, "O") || IsLine(4, 5, 6, "O") || IsLine(7, 8, 9, "O")//vertical
@@ -49,7 +59,6 @@ namespace TicTacToe
                 || IsLine(1, 4, 7, "O") || IsLine(2, 5, 8, "O") || IsLine(7, 5, 3, "O")//horizontal
                 )
             {
-                win = true;
                 return true;
             }
             //X
@@ -58,7 +67,6 @@ namespace TicTacToe
                 || IsLine(1, 4, 7, "X") || IsLine(2, 5, 8, "X") || IsLine(7, 5, 3, "X")//horizontal
                 )
             {
-                win = true;
                 return true;
             }
             return false;
@@ -133,6 +141,7 @@ namespace TicTacToe
             Console.Clear();
             if (replay == 1)
             {
+                Refresh();
                 return true;
             }
             Console.WriteLine("The game has ended.");
@@ -153,63 +162,58 @@ namespace TicTacToe
 
             bool playing = true;
             int score1 = 0, score2 = 0;
-            bool win = false;
-            int turn = 1;
+            int turn = 1, turnsTaken = 1;
+            int Draw = 10;
 
-            //ERR: FIX Showing Scoreboard
             while (playing)
             {
-                if (win == false)
+                //check if somebody has won
+                while (CheckWin() == false)
                 {
-                    //check if somebody has won
-                    //FIX: never goes to true
-                    win = CheckWin(win);
-                    //take turn
-                    while (win == false)
-                    {
-                        //shows scores and draws field
-                        ShowScore(player1, score1, player2, score2);
-                        TakeTurns(player1, player2, turn);
+                    //shows scores and draws field
+                    ShowScore(player1, score1, player2, score2);
+                    //look who turn it is take that turn
+                    TakeTurns(player1, player2, turn);
+                    turnsTaken++;
 
-                        //turns
-                        if (turn == 1)
-                        {
-                            turn = 2;
-                            Console.Clear();
-                        }
-                        else
-                        {
-                            turn = 1;
-                            Console.Clear();
-                        }
-                    }
-                    //reset game
-                    Console.Clear();
-                    DrawTicTacToe();
-
-                    //draw
-                    if (win == false)
+                    //draw after x turns
+                    if (turnsTaken >= Draw)
                     {
                         Console.WriteLine("It's a draw.");
                         Console.WriteLine("Score: {0} - {1}     {2} - {3}", player1, score1, player2, score2);
                         playing = Replay();
                     }
 
-                    //score calculation
-                    if (win == true)
+                    //Turn end
+                    if (turn == 1)
                     {
-                        if (turn == 1)
-                        {
-                            score1++;
-                            Console.WriteLine("{0} wins! ", player1);
-                            playing = Replay();
-                        }
-                        else if (turn == 2)
-                        {
-                            score2++;
-                            Console.WriteLine("{0} wins! ", player2);
-                            playing = Replay();
-                        }
+                        turn = 2;
+                        Console.Clear();
+                    }
+                    else
+                    {
+                        turn = 1;
+                        Console.Clear();
+                    }
+                }
+                //Show Result
+                Console.Clear();
+                DrawTicTacToe();
+
+                //score calculation
+                if (CheckWin() == true)
+                {
+                    if (turn == 1)
+                    {
+                        score1++;
+                        Console.WriteLine("{0} wins! ", player1);
+                        playing = Replay();
+                    }
+                    else if (turn == 2)
+                    {
+                        score2++;
+                        Console.WriteLine("{0} wins! ", player2);
+                        playing = Replay();
                     }
                 }
             }
